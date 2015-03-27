@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>GoAuth</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta content="Ink" property="og:title">
+		<meta content="Ink app" property="og:description">
+
+		<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.2/yeti/bootstrap.min.css" rel="stylesheet">
+		<link href="/statics/style.css" rel="stylesheet" type="text/css">
+		
+	</head>
+	<body>
+		<div class="container">
+			<form id="login_form">
+				<h2>Sign in to continue</h2>
+				<label for="username" class="sr-only">Login</label>
+				<input type="text"  id="login" class="form-control" name="login" placeholder="Login" autofocus required>
+				<label for="password" class="sr-only">Password</label>
+				<input type="password" id="password" class="form-control" name="password" placeholder="Password" required>
+				<br>
+				<input type="submit" id="get_the_app_button" class="btn btn-lg btn-primary btn-block" value="Sign in">
+			</form>
+		</div>
+
+		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
+		<script>
+			require([
+				"dojo/dom",
+				"dojo/on",
+				"dojo/request/xhr",
+				"dojo/dom-form"], 
+			function(dom, on, xhr, domForm) {
+				on(dom.byId("login_form"), "submit", function(e){
+					e.preventDefault();
+					if (dom.byId("login_form").checkValidity() == false) {
+						return;
+					}
+					xhr("/auth", {
+					    handleAs: "json",
+					    method: "POST",
+					    data: domForm.toObject("login_form")
+					}).then(function(data) {
+						window.location.replace("/");
+					}, function(err) {
+						if (err.response.data != null) {
+							var data = err.response.data;
+							if (data.field != null) {
+								dom.byId("login_form")[data.field].focus();
+								alert(data.error_message);
+								
+							} else {
+								alert("Error:"+data.error_message);
+							}
+						}
+					}, function(evt) {
+						// Handle a progress event from the request if the
+						// browser supports XHR2
+					});
+					return false;
+				});
+				on(dom.byId("get_the_app_button"), "submit", function(e){
+
+				});
+			});
+		</script>
+	</body>
+</html>
